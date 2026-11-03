@@ -1,0 +1,6 @@
+TROPA V22 - GITHUB SEM SUBPASTAS
+
+EXTRAIA O ZIP. Envie os arquivos soltos ao GitHub (nao o ZIP inteiro).
+Obrigatorios: package.json, netlify.toml, MONTAR_TROPA_V22.cjs, TROPA_V22_CONTEUDO.bin.
+No Netlify: Import GitHub; build npm run build:cloud; publish cloud/site.
+As pastas sao criadas no build. As credenciais Firebase e LiveKit continuam sendo as suas e ficam apenas nas variaveis privadas da Netlify.
