@@ -1,16 +1,16 @@
 {
-  "name": "tropa-v22",
-  "version": "2.2.0",
+  "name": "tropa-v24",
+  "version": "2.4.0",
   "private": true,
-  "description": "TROPA V22 Cloud: upload facil sem pastas GitHub; Netlify reconstitui codigo original automaticamente",
+  "description": "TROPA V24 — Firebase Netlify LiveKit; tela grande, fóruns, denúncias, moderação e design",
   "engines": {
     "node": ">=22.13.0"
   },
   "scripts": {
     "start": "node apps/api/server.js",
     "dev": "node --watch apps/api/server.js",
-    "test": "npm run test:v22",
-    "check": "npm run check:v22",
+    "test": "npm run test:v24",
+    "check": "npm run check:v24",
     "build:livekit": "node scripts/build-livekit.mjs",
     "backup": "node scripts/backup-data.mjs backup",
     "backup:verify": "node scripts/backup-data.mjs verify",
@@ -25,12 +25,16 @@
     "build:netlify": "node scripts/build-netlify.mjs",
     "smoke:deploy": "node scripts/smoke-deployment-v20.mjs",
     "build:cloud": "node MONTAR_TROPA_V22.cjs && node scripts/build-cloud.mjs",
-    "test:v22": "node MONTAR_TROPA_V22.cjs && node --test tests/v22*.test.js",
-    "check:v22": "node MONTAR_TROPA_V22.cjs && node --check cloud/functions/api.js && node --check cloud/lib/actions.js && node --check cloud/lib/validation.js && node --check cloud/source/app.js && node --check scripts/build-cloud.mjs && node --test tests/v22*.test.js",
+    "test:v22": "node --test tests/v22*.test.js",
+    "check:v22": "node --check cloud/functions/api.js && node --check cloud/lib/actions.js && node --check cloud/lib/social.js && node --check cloud/lib/community.js && node --check cloud/lib/validation.js && node --check cloud/source/app.js && node --check scripts/build-cloud.mjs && npm run test:v22",
     "dev:cloud": "npx netlify-cli dev",
     "start:legacy": "node apps/api/server.js",
     "test:legacy": "node --test tests/*.test.js",
     "check:legacy": "node --check apps/api/server.js && node --check apps/api/deployment-origin.js && node --check apps/web/app.js && node --test tests/v21.test.js && node --check scripts/build-netlify.mjs && node --check scripts/preflight-v20.mjs && npm test && npm run smoke:realtime",
+    "test:v23": "node --test tests/v22*.test.js tests/v23-*.test.js",
+    "check:v23": "node --check cloud/functions/api.js && node --check cloud/lib/actions.js && node --check cloud/lib/social.js && node --check cloud/lib/groups.js && node --check cloud/lib/community.js && node --check cloud/lib/engagement.js && node --check cloud/source/app.js && node --check scripts/build-cloud.mjs && npm run test:v23",
+    "test:v24": "node MONTAR_TROPA_V22.cjs && node --test tests/v22*.test.js tests/v23-*.test.js tests/v24-*.test.js",
+    "check:v24": "node MONTAR_TROPA_V22.cjs && node --check cloud/source/app.js && node --check cloud/lib/forum.js && node --check cloud/lib/reports.js && npm run test:v24",
     "prepare:files": "node MONTAR_TROPA_V22.cjs"
   },
   "dependencies": {

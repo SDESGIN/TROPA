@@ -1,36 +1,23 @@
-/*
- * TROPA V22 — preparador para GitHub sem subpastas.
- * Este arquivo reconstitui o código original no momento do build da Netlify.
- * Sem npm extra, sem credenciais e sem necessidade de executar no seu PC.
- */
+/* TROPA V24 — montagem do app completo a partir de 8 arquivos soltos para GitHub Web. */
 'use strict';
-const fs = require('node:fs');
-const path = require('node:path');
-const zlib = require('node:zlib');
-const crypto = require('node:crypto');
-const expectedHash = '0cfb6ec41eba051e25a851e401791a11eee3f05696c6bec203374b419776295a';
-const payloadFile = path.join(__dirname, 'TROPA_V22_CONTEUDO.bin');
-const root = __dirname;
-function run() {
-  if (!fs.existsSync(payloadFile)) throw new Error('Arquivo TROPA_V22_CONTEUDO.bin nao encontrado. Envie TODOS os arquivos soltos ao GitHub.');
-  const packed = fs.readFileSync(payloadFile);
-  const hash = crypto.createHash('sha256').update(packed).digest('hex');
-  if (hash !== expectedHash) throw new Error('Arquivo compactado alterado ou incompleto. Faca download do ZIP novamente.');
-  const data = JSON.parse(zlib.gunzipSync(packed).toString('utf8'));
-  if (data.format !== 'tropa-v22-flat-archive-v1') throw new Error('Formato do pacote desconhecido.');
-  let count = 0, bytes = 0;
-  for (const [rel, base64] of Object.entries(data.files)) {
-    const dest = path.resolve(root, rel);
-    if (rel.includes('\\') || rel.startsWith('/') || path.isAbsolute(rel) || dest === root || !dest.startsWith(root + path.sep)) throw new Error('Caminho inseguro no pacote: ' + rel);
-    const buffer = Buffer.from(base64, 'base64');
-    fs.mkdirSync(path.dirname(dest), {recursive:true});
-    fs.writeFileSync(dest, buffer);
-    count++;bytes+=buffer.length;
-  }
-  for (const filename of ['cloud/source/index.html','cloud/source/app.js','cloud/functions/api.js','cloud/lib/actions.js','cloud/firestore.rules','scripts/build-cloud.mjs']) {
-    if (!fs.existsSync(path.join(root,filename))) throw new Error('Falta arquivo obrigatorio: '+filename);
-  }
-  console.log(`TROPA V22: ${count} arquivos recompostos (${(bytes/1048576).toFixed(1)} MB).`);
-  console.log('Pastas cloud/functions, cloud/source e assets prontas para build Netlify.');
+const fs=require('node:fs'),path=require('node:path'),zlib=require('node:zlib'),crypto=require('node:crypto');
+const root=__dirname,blobFile=path.join(root,'TROPA_V22_CONTEUDO.bin'),EXPECTED='548e08dcea07e2db5be2cc913fef633ddf8d53e1597626286a0625d89d6c9241';
+function build(){
+ if(!fs.existsSync(blobFile))throw Error('Falta TROPA_V22_CONTEUDO.bin: envie os OITO arquivos soltos ao GitHub.');
+ const packed=fs.readFileSync(blobFile),sha=crypto.createHash('sha256').update(packed).digest('hex');
+ if(sha!==EXPECTED)throw Error('Payload da TROPA V24 incompleto ou alterado. Refaça o upload dos 8 arquivos.');
+ const archive=JSON.parse(zlib.gunzipSync(packed).toString('utf8'));
+ if(archive.format!=='tropa-v24-flat-archive-v1'||archive.version!=='2.4.0')throw Error('Conteúdo da V24 incompatível.');
+ let count=0,bytes=0;
+ for(const [rel,b64] of Object.entries(archive.files)){
+  const target=path.resolve(root,rel);
+  if(!rel||rel.startsWith('/')||rel.includes('\\')||path.isAbsolute(rel)||target===root||!target.startsWith(root+path.sep))throw Error('Caminho bloqueado no pacote: '+rel);
+  if(!/^[A-Za-z0-9+/]*={0,2}$/.test(b64))throw Error('Base64 inválido em '+rel);
+  const content=Buffer.from(b64,'base64');
+  fs.mkdirSync(path.dirname(target),{recursive:true});fs.writeFileSync(target,content);count++;bytes+=content.length;
+ }
+ for(const name of ['cloud/source/app.js','cloud/source/style.css','cloud/source/index.html','cloud/lib/forum.js','cloud/lib/reports.js','cloud/lib/actions.js','cloud/functions/api.js','cloud/firestore.rules','scripts/build-cloud.mjs'])
+  if(!fs.existsSync(path.join(root,name)))throw Error('Falta arquivo obrigatório '+name);
+ console.log(`TROPA V24: ${count} arquivos reconstruídos (${(bytes/1048576).toFixed(1)} MB), Firebase/LiveKit/Netlify sem credenciais embutidas.`);
 }
-try { run(); } catch(e) { console.error('Erro ao preparar o TROPA V22:',e.message);process.exitCode=1; }
+try{build();}catch(e){console.error('TROPA V24 erro:',e.message);process.exitCode=1;}

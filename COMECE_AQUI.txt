@@ -1,6 +1,9 @@
-TROPA V22 - GITHUB SEM SUBPASTAS
+TROPA V24 - GITHUB SEM PASTAS
 
-EXTRAIA O ZIP. Envie os arquivos soltos ao GitHub (nao o ZIP inteiro).
-Obrigatorios: package.json, netlify.toml, MONTAR_TROPA_V22.cjs, TROPA_V22_CONTEUDO.bin.
-No Netlify: Import GitHub; build npm run build:cloud; publish cloud/site.
-As pastas sao criadas no build. As credenciais Firebase e LiveKit continuam sendo as suas e ficam apenas nas variaveis privadas da Netlify.
+1. EXTRAIA O ZIP.
+2. Copie REGRAS_FIRESTORE_V221.txt para Firebase > Firestore > Rules > Publish.
+3. Faça backup. No mesmo GitHub, envie os OITO arquivos SOLTOS para substituir a V23.
+4. Build npm run build:cloud | Publish cloud/site | Functions cloud/functions.
+5. Confira Netlify Deploys e /api/health versao 2.4.0.
+6. Teste voice, webcam, compartilhar em tela grande, DMs, foruns, denuncias e mensagens em redes diferentes.
+7. Rotacione quaisquer chaves privadas antes de abrir acesso publico.

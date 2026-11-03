@@ -1,0 +1,83 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function member(serverId) {
+      return signedIn() && exists(/databases/$(database)/documents/servers/$(serverId)/members/$(request.auth.uid));
+    }
+    match /accounts/{username} { allow read, write: if false; }
+    match /invites/{invite} { allow read, write: if false; }
+    match /meta/{document} { allow read, write: if false; }
+    match /users/{userId} {
+      allow get: if signedIn() && request.auth.uid == userId;
+      allow list, create, update, delete: if false;
+    }
+    // Conversas privadas: apenas participantes conseguem ler as mensagens.
+    // Nenhum cliente escreve diretamente; todas as mensagens passam pela API autenticada.
+    match /dmThreads/{threadId} {
+      allow get: if signedIn() && request.auth.uid in resource.data.members;
+      allow list, create, update, delete: if false;
+      match /messages/{messageId} {
+        allow get, list: if signedIn()
+          && exists(/databases/$(database)/documents/dmThreads/$(threadId))
+          && request.auth.uid in get(/databases/$(database)/documents/dmThreads/$(threadId)).data.members;
+        allow create, update, delete: if false;
+      }
+    }
+    match /users/{userId}/dmThreads/{threadId} {
+      allow get, list: if signedIn() && request.auth.uid == userId;
+      allow create, update, delete: if false;
+    }
+    // Grupos privados: membros podem ler; escrita sempre passa pela API.
+    match /groupThreads/{groupId} {
+      allow get: if signedIn() && request.auth.uid in resource.data.members;
+      allow list, create, update, delete: if false;
+      match /messages/{messageId} {
+        allow get, list: if signedIn()
+          && exists(/databases/$(database)/documents/groupThreads/$(groupId))
+          && request.auth.uid in get(/databases/$(database)/documents/groupThreads/$(groupId)).data.members;
+        allow create, update, delete: if false;
+      }
+    }
+    match /users/{userId}/groupThreads/{groupId} {
+      allow get, list: if signedIn() && request.auth.uid == userId;
+      allow create, update, delete: if false;
+    }
+    match /servers/{serverId} {
+      allow get: if member(serverId);
+      allow list, create, update, delete: if false;
+      // Enquetes e eventos lidos apenas por membros. Escrita somente pela Function.
+      match /polls/{pollId} {
+        allow get, list: if member(serverId);
+        allow create, update, delete: if false;
+      }
+      match /events/{eventId} {
+        allow get, list: if member(serverId);
+        allow create, update, delete: if false;
+      }
+      // Moderation reports are accessible only to the authenticated backend.
+      match /reports/{reportId} { allow read, write: if false; }
+      match /members/{userId} {
+        allow get, list: if member(serverId);
+        allow create, update, delete: if false;
+      }
+      match /channels/{channelId} {
+        allow get, list: if member(serverId);
+        allow create, update, delete: if false;
+        match /threads/{topicId} {
+          allow get, list: if member(serverId);
+          allow create, update, delete: if false;
+          match /replies/{replyId} {
+            allow get, list: if member(serverId);
+            allow create, update, delete: if false;
+          }
+        }
+        match /messages/{messageId} {
+          allow get, list: if member(serverId);
+          allow create, update, delete: if false;
+        }
+      }
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}

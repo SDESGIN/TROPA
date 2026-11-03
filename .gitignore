@@ -1,8 +1,9 @@
 node_modules/
 .netlify/
 cloud/site/
+dist/
 .env
-.env.*.local
+.env.*
 *.sqlite*
 data/
 backups/
